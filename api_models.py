@@ -36,7 +36,6 @@ for file_model in model_files:
 
     models[type(model).__name__] = model
 
-print(models.keys())
 
 @api.get('/', name='Check API')
 def index() -> dict:
@@ -46,11 +45,11 @@ def index() -> dict:
 
     return {"status": "running"}
 
-@api.get('/info', name='Get database informations for use and subject')
+@api.get('/info', name='Get informations')
 def get_info(authorization_header=Header(default="Basic ",
                                   description="authorization header need to contain credentials of user (username:password)")) -> dict:
     """
-    Return a dictionnary that contains use and subjects values with their ids
+    Return informations on API
     """
 
     authorization_string = re.search("Basic \w*:\w*",authorization_header)
@@ -58,6 +57,7 @@ def get_info(authorization_header=Header(default="Basic ",
     if authorization_string is None or authorization_string.group().split("Basic ")[1] not in credentials:
         raise HTTPException(status_code=403, detail="You do not have authorization to acces this ressource")
 
+    # Return models list
     return {"models": list(models.keys())}
 
     
