@@ -14,7 +14,7 @@ import binascii
 
 api = FastAPI(
     title='API Models',
-    description="""This API allow to get predict from trained
+    description="""This API allow to get predictions from trained
      Machine Learning models
     """,
     version="1.0.0"
