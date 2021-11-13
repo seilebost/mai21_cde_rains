@@ -1,4 +1,5 @@
 import requests
+from api_models import get_models_list
 
 
 def test_api_status():
@@ -15,3 +16,4 @@ def test_api_info():
     )
 
     assert res.status_code == 200
+    assert res.json() == {"models": get_models_list()}

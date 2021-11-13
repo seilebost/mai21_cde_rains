@@ -29,14 +29,27 @@ credentials = [
 ]
 
 
-model_files = glob.glob("*_trained")
-models = {}
+def get_models_dict() -> dict:
+    """
+    Return the dict of available models
+    """
+    model_files = glob.glob("*_trained")
+    models = {}
 
-for file_model in model_files:
-    with open(file_model, "rb") as mod_file:
-        model = pickle.load(mod_file)
+    for file_model in model_files:
+        with open(file_model, "rb") as mod_file:
+            model = pickle.load(mod_file)
 
-    models[type(model).__name__] = model
+        models[type(model).__name__] = model
+
+    return models
+
+
+def get_models_list() -> list:
+    """
+    Return the list of available models
+    """
+    return list(get_models_dict().keys())
 
 
 @api.get("/", name="Check API")
@@ -88,4 +101,4 @@ def get_info(
         )
 
     # Return models list
-    return {"models": list(models.keys())}
+    return {"models": get_models_list()}
