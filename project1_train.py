@@ -7,7 +7,7 @@ Original file is located at
     https://colab.research.google.com/drive/1U4p-4st7S7WGO_cSMWGbvLS2WLvr2Nqy
 """
 
-#Import des modules pour le projet
+# Import des modules pour le projet
 import pandas as pd
 import numpy as np
 import os
@@ -39,187 +39,108 @@ from sklearn.neighbors import KNeighborsClassifier
 
 from sklearn.preprocessing import StandardScaler
 import warnings
+
 warnings.filterwarnings("ignore")
 
 
-"""#**Lecture du fichier csv**"""
+def get_data():
 
-#Chargement du fichier rains dans le dataframe rains
-rains = pd.read_csv('https://assets-datascientest.s3-eu-west-1.amazonaws.com/de/total/rains.csv')
+    # Chargement du fichier rains dans le dataframe rains
+    rains = pd.read_csv(
+        "https://assets-datascientest.s3-eu-west-1.amazonaws.com/de/total/rains.csv"
+    )
 
-#affichage des 5 premières lignes
-rains.head()
+    rains = rains.drop(["Date"], axis=1)
+    rains = rains.drop(["Location"], axis=1)
 
-# le nombre de lignes/colonnes
-print("Le nombre de lignes est : ",rains.shape[0])
-print("Le nombre de colonnes est : ",rains.shape[1])
+    # On supprime les lignes où RainToday et RainTomorrow ont une valeur NaN pour plus de pertinence (on ne peut pas savoir si il a plu ou non)
+    rains = rains.dropna(
+        axis=0, how="any", subset=["RainToday", "RainTomorrow"]
+    )
 
+    # On supprime également les lignes avec des temperatures non renseignées car nous estimons que les températures sont des éléments importants dans la prédiction
+    rains = rains.dropna(axis=0, how="any", subset=["Temp9am", "Temp3pm"])
 
+    # Remplacer les valeurs manquantes pour les variables numériques suivant l'analyse faite avec describe sur les champs numériques plus haut
+    from sklearn.impute import SimpleImputer
 
+    valeur1 = SimpleImputer(missing_values=np.nan, strategy="mean")
+    valeur2 = SimpleImputer(missing_values=np.nan, strategy="median")
+    rains[["Evaporation"]] = valeur2.fit_transform(rains[["Evaporation"]])
+    rains[["Sunshine"]] = valeur1.fit_transform(rains[["Sunshine"]])
+    rains[["Cloud3pm"]] = valeur1.fit_transform(rains[["Cloud3pm"]])
+    rains[["Cloud9am"]] = valeur1.fit_transform(rains[["Cloud9am"]])
+    rains[["Pressure9am"]] = valeur1.fit_transform(rains[["Pressure9am"]])
+    rains[["Pressure3pm"]] = valeur1.fit_transform(rains[["Pressure3pm"]])
 
-"""On peut avoir que le test statistique pour la relation Rainfall-RainToday et Rainfall-RainTomorrow donne un p-value inférieur à 5% dans les deux.
-On voit donc bien que Rainfall n'est pas indépendante de RainToday et RainTomorrow.
+    # On remplace les NaN des restant des variables numérique par la moyenne car plusieurs ont comme valeur la plus fréquente la valeur NaN. On ne peut donc pas utiliser le mode pour les remplacer
+    rains = rains.fillna(rains.mean())
 
-# **Analyse de la metéo passée**
+    # On remplace les valeurs manquantes des variables catégoriales WindGustDir, WindDir9am, WindDir3pm par leur mode
+    rains["WindGustDir"] = rains["WindGustDir"].fillna(
+        rains["WindGustDir"].mode()[0]
+    )
+    rains["WindDir9am"] = rains["WindDir9am"].fillna(
+        rains["WindDir9am"].mode()[0]
+    )
+    rains["WindDir3pm"] = rains["WindDir3pm"].fillna(
+        rains["WindDir3pm"].mode()[0]
+    )
 
-On s'interresse au nombre de jours de pluie sur différentes périodes
-"""
+    # On va binariser les variables de type non numérique
+    from sklearn.preprocessing import LabelEncoder
 
-rains_2 = rains.copy()
-rains_2['month'] = rains_2['Date'].apply(lambda x: int(x.split('-')[1])).astype('int')
-rains_2['year'] = rains_2['Date'].apply(lambda x: x.split('-')[0]).astype('int')
-rains_2['day'] = rains_2['Date'].apply(lambda x: int(x.split('-')[2])).astype('int')
-rains_2['name_of_month'] = pd.to_datetime(rains_2['Date']).dt.month_name()
-rains_2[['RainToday', 'RainTomorrow']] = rains_2[['RainToday', 'RainTomorrow']].replace({'Yes':1, 'No':0})
+    for c in rains.columns:
+        if rains[c].dtype == "object":
+            lbl = LabelEncoder()
+            lbl.fit(list(rains[c].values))
+            rains[c] = lbl.transform(rains[c].values)
 
-rains_2.groupby(by=['year', 'name_of_month', 'Location']).agg({'RainToday': 'sum'})
+    X = rains.drop(["RainTomorrow"], axis=1)
+    y = rains["RainTomorrow"]
 
-df_rain_group = rains_2.groupby(by=['year', 'name_of_month', 'Location'], as_index=False).agg({'RainToday': 'sum'})
-df_rain_group.head(30)
+    scaler = StandardScaler()
+    X_scaled = scaler.fit(X).transform(X)
 
-df_rain_group['RainToday'].describe()
+    X_train, X_test, y_train, y_test = train_test_split(
+        X_scaled, y, test_size=0.2, random_state=2, stratify=y
+    )
 
-"""On peut voir que pour une majorité du temps il y a moins de 10 jours de pluie par mois et par ville
-
-"""
-
-df_rain_group.groupby('name_of_month').agg({'RainToday': 'sum'})
-
-"""On peut voir que le mois de Juin est celui qui regroupe le plus de jours de pluie depuis 2007"""
-
-df_rain_group.groupby('year').agg({'RainToday': 'sum'})
-
-df_rain_group.groupby('year').agg({'RainToday': 'sum'}).idxmax()
-
-"""L'année 2010 a été l'année la plus pluvieuse.
-
-#**Nettoyage du jeu de données**
-"""
-
-#Extraction des jours, mois, années de la date et suppression de la date
-rains.Date = rains.Date.apply(pd.to_datetime)
-rains.drop(['Date'], 1, inplace = True)
-
-#On supprime les lignes où RainToday et RainTomorrow ont une valeur NaN pour plus de pertinence (on ne peut pas savoir si il a plu ou non)
-rains = rains.dropna(axis=0, how='any', subset=['RainToday', 'RainTomorrow'])
-
-#On supprime également les lignes avec des temperatures non renseignées car nous estimons que les températures sont des éléments importants dans la prédiction
-rains = rains.dropna(axis=0, how='any', subset=['Temp9am', 'Temp3pm'])
-
-#Remplacer les valeurs manquantes pour les variables numériques suivant l'analyse faite avec describe sur les champs numériques plus haut
-from sklearn.impute import SimpleImputer
-
-valeur1 = SimpleImputer(missing_values=np.nan, strategy='mean')
-valeur2 =SimpleImputer(missing_values = np.nan, strategy = 'median')
-rains[['Evaporation']] = valeur2.fit_transform(rains[['Evaporation']])
-rains[['Sunshine']] = valeur1.fit_transform(rains[['Sunshine']])
-rains[['Cloud3pm']] = valeur1.fit_transform(rains[['Cloud3pm']])
-rains[['Cloud9am']] = valeur1.fit_transform(rains[['Cloud9am']])
-rains[['Pressure9am']] = valeur1.fit_transform(rains[['Pressure9am']])
-rains[['Pressure3pm']] = valeur1.fit_transform(rains[['Pressure3pm']])
-
-#Nouvelle recherche des valeurs manquantes dans le dataset
-rains.isna().sum()
-
-"""Les valeurs manquantes des champs Evaporation, Sunshine, Cloud3pm, Cloud9am, Pressure9am, Pressure3pm ont bien été alimentées"""
-
-rains.head()
-
-#On remplace les NaN des restant des variables numérique par la moyenne car plusieurs ont comme valeur la plus fréquente la valeur NaN. On ne peut donc pas utiliser le mode pour les remplacer
-rains = rains.fillna(rains.mean())
-
-#Nouvelle recherche des valeurs manquantes dans le dataset
-rains.isna().sum()
-
-#On remplace les valeurs manquantes des variables catégoriales WindGustDir, WindDir9am, WindDir3pm par leur mode
-rains['WindGustDir'] = rains['WindGustDir'].fillna(rains['WindGustDir'].mode()[0])
-rains['WindDir9am'] = rains['WindDir9am'].fillna(rains['WindDir9am'].mode()[0])
-rains['WindDir3pm'] = rains['WindDir3pm'].fillna(rains['WindDir3pm'].mode()[0])
-
-rains.isna().sum()
-
-"""Il n'existe plus de valeurs manquantes"""
-
-rains
+    return X_train, X_test, y_train, y_test
 
 
-#On va binariser les variables de type non numérique
-from sklearn.preprocessing import LabelEncoder
-for c in rains.columns:
-    if rains[c].dtype=='object':    
-        lbl = LabelEncoder()
-        lbl.fit(list(rains[c].values))
-        rains[c] = lbl.transform(rains[c].values)
+if __name__ == "__main__":
 
-rains.head()
+    X_train, X_test, y_train, y_test = get_data()
 
-X = rains.drop(['RainTomorrow'], axis = 1)
-y = rains['RainTomorrow']
+    params_lgb = {
+        "colsample_bytree": 0.95,
+        "max_depth": 16,
+        "min_split_gain": 0.1,
+        "n_estimators": 200,
+        "num_leaves": 50,
+        "reg_alpha": 1.2,
+        "reg_lambda": 1.2,
+        "subsample": 0.95,
+        "subsample_freq": 20,
+    }
 
-"""# Entrainement des modèles
+    models = [
+        LogisticRegression(),
+        LinearDiscriminantAnalysis(),
+        KNeighborsClassifier(),
+        GaussianNB(),
+        DecisionTreeClassifier(),
+        SVC(),
+        lgb.LGBMClassifier(**params_lgb),
+        RandomForestClassifier(n_estimators=100, max_depth=4, random_state=0),
+    ]
 
-On normalise le jeu de données X
-"""
+    # Train models and save to files
+    for model in models:
+        print(f"Model: {type(model).__name__}")
 
-scaler = StandardScaler()
-X_scaled = scaler.fit(X).transform(X)
+        model.fit(X_train, y_train)
 
-
-#On va voir la proportion des valeur pour la variable à prédir RainTomorrow
-rains.RainTomorrow.value_counts()
-
-
-params_lgb ={'colsample_bytree': 0.95, 
-         'max_depth': 16, 
-         'min_split_gain': 0.1, 
-         'n_estimators': 200, 
-         'num_leaves': 50, 
-         'reg_alpha': 1.2, 
-         'reg_lambda': 1.2, 
-         'subsample': 0.95, 
-         'subsample_freq': 20}
-
-
-
-"""On constate que le modèle qui obtient un taux d'accuracy et de rappel les plus élevés est le LGBMClassifier avec un taux d'accuracy à 0,85 et un taux de rappel à plus de 0,5.
-En revanche, le taux de la précision obtenu par le modèle LGBMClassifier est plus faible que les autres modèles,le taux le plus élevé a été obtenu par le modèle RandomForestClassifier.
-Globalement, on constate que sur les différents modèles les performances sont à peu près les mêmes.
-
-Nous allons ensuite évaluer plusieurs modèles avec différentes tailles de jeu de test afin de voir si cela a une influence sur les performances et si un modèle en particulier se détache des autres.
-"""
-
-sizes = [0.1, 0.2, 0.3, 0.4, 0.5]
-models = [LogisticRegression(), LinearDiscriminantAnalysis(), KNeighborsClassifier(), GaussianNB(), DecisionTreeClassifier(), SVC(), lgb.LGBMClassifier(**params_lgb), RandomForestClassifier(n_estimators=100, max_depth=4,random_state=0)]
-
-for model in models:
-    print(f"Model: {type(model).__name__}")
-    
-    X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=2, stratify=y)
-
-    model.fit(X_train, y_train)
-
-    with open(f"{type(model).__name__}_trained", 'wb') as file:
-        pickle.dump(model, file)
-
-
-"""D'après les résultats nous voyons que l'accuracy obtenue est très proches des premiers entraînement que nous avons réalisés. L'accuracy maximale étant de 0.85 pour le LGBMClassifier. Les scores de precision et recall sont assez élevés pour la classe 0 de la  variable cible (Pas de pluie le lendemain) et sont plus faibles pour la classe 1.
-Nous pouvons également voir que le f1-score est assez élevé sur l'ensemble des modèles avec cependant un maximum de 0.91 pour le LGBMClassifier. Une métrique f1 élevée nous indique que le modèle possséde des performances de rappel et de précision équilibrées. Ceci nous indique que le LGBMClassifier serait le modèle à privilégier.
-
-Nous faisons ensuite une évaluations des modèles par validation croisée car cela permet d'obtenir des résultats plus stable que la séparation en jeu de données obtenus par la fonction train_test_split.
-"""
-
-# folds_nb = [2, 3, 4, 5, 6, 7, 8]
-
-# for model in models:
-#     print(f"Model evaluation : {type(model).__name__}\n")
-#     for n_fold in folds_nb:
-#         folds = StratifiedKFold(n_splits=n_fold, shuffle=True)
-#         print(f"Model evaluation for split size: {n_fold} ({type(model).__name__})\n")
-#         print(cross_val_score(model, X_scaled, y, cv=folds))
-#         print("\n")
-
-"""Là encore nous obtenons des scores très homogènes. Les performances sont donc sensiblement les mêmes en utilisant la fonction train_test_split ou évaluant par validation croisée. Nous remarquons cependant que pour les modèles DecisionTreeClassifier et SVC les scores ne sont que de 0.77 en moyenne. La plupart des autres modèles ont des scores se  situant autour de 0.83.
-Néanmoins le modèle LGBMClassifier obtient le score maximum de 0.86 avec différentes tailles de split, de plus les scores obtenus sont rarement en dessous de 0.85 contrairement aux autres modèles
-
-Ces résultats confirment les précedentes évaluations et nous incident à préférer le modèle LGBMClassifier pour réaliser nos prédictions.
-"""
+        with open(f"{type(model).__name__}_trained", "wb") as file:
+            pickle.dump(model, file)
