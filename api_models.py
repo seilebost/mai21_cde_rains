@@ -120,6 +120,11 @@ def check_authorization(authorization_header=auth_header):
         )
 
 
+models_dict = get_models_dict()
+
+# Endpoints
+
+
 @api.get("/", name="Check API")
 def index() -> dict:
     """
@@ -139,9 +144,14 @@ def get_info(authorization_header=Depends(check_authorization)) -> dict:
     return {"models": get_models_list()}
 
 
-@api.get("/score", name="Get performance score for a model")
-def score(authorization_header=Depends(check_authorization)) -> dict:
-    return {"score": 1}
+@api.post("/score", name="Get performance score for a model")
+def score(
+    modelsname: ModelsName, authorization_header=Depends(check_authorization)
+) -> dict:
+
+    return {
+        "score": models_dict[modelsname.model_name.value].score(X_test, y_test)
+    }
 
 
 if __name__ == "__main__":
