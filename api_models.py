@@ -13,7 +13,7 @@ import base64
 import binascii
 import uvicorn
 
-from project1_train import get_data
+from project1_train import get_processed_data
 
 api = FastAPI(
     title="API Models",
@@ -32,7 +32,7 @@ credentials = [
 ]
 
 # retrieve data to provide score with models
-X_train, X_test, y_train, y_test = get_data()
+X_train, X_test, y_train, y_test = get_processed_data()
 
 auth_header = Header(
     default="Basic ",
