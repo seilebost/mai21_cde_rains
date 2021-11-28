@@ -1,9 +1,10 @@
 import requests
-from api_models import get_models_dict, get_data
+from api_models import get_models_dict
+from project1_train import get_processed_data
 import pytest
 
 dict_models = get_models_dict()
-X_train, X_test, y_train, y_test = get_data()
+X_train, X_test, y_train, y_test = get_processed_data()
 
 
 @pytest.mark.parametrize("model_name", list(dict_models.keys()))
