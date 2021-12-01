@@ -26,10 +26,28 @@ def test_predict(model_name):
         res = requests.post(
             f"http://127.0.0.1:8000/predict/{model_name}",
             headers={"authorization-header": "Basic YWxpY2U6d29uZGVybGFuZA=="},
-            files={"file": csv_file},
+            files={"file": ("test.csv", csv_file, "text/csv")},
         )
 
     assert res.status_code == 200
     assert res.json() == {
         "prediction": dict_models[model_name].predict(X_predict).tolist()
+    }
+
+
+@pytest.mark.parametrize("model_name", list(dict_models.keys()))
+def test_predict_wrong_file_type(model_name):
+
+    with open("README.md", "rb") as csv_file:
+
+        res = requests.post(
+            f"http://127.0.0.1:8000/predict/{model_name}",
+            headers={"authorization-header": "Basic YWxpY2U6d29uZGVybGFuZA=="},
+            files={"file": ("test.csv", csv_file, "text/markdown")},
+        )
+
+    assert res.status_code == 400
+    assert res.json() == {
+        "detail": "Wrong file type or type not specified."
+        + "Only csv files are accepted"
     }

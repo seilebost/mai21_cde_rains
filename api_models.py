@@ -169,6 +169,13 @@ def predict(
     authorization_header=Depends(check_authorization),
 ) -> dict:
 
+    if file.content_type != "text/csv":
+        raise HTTPException(
+            status_code=400,
+            detail="Wrong file type or type not specified."
+            + "Only csv files are accepted",
+        )
+
     dataframe = pd.read_csv(file.file)
 
     dataframe = clean_rows(dataframe)
