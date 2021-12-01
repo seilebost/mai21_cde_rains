@@ -1,0 +1,2 @@
+Date,Location,MinTemp,MaxTemp,Rainfall,Evaporation,Sunshine,WindGustDir,WindGustSpeed,WindDir9am,WindDir3pm,WindSpeed9am,WindSpeed3pm,Humidity9am,Humidity3pm,Pressure9am,Pressure3pm,Cloud9am,Cloud3pm,Temp9am,Temp3pm,RainToday,RainTomorrow
+2017-06-21,Perth,10.3,19.9,0.2,1.8,7.5,NW,37.0,NNE,NNW,9.0,15.0,89.0,60.0,1017.1,1013.8,5.0,6.0,13.0,18.5,No,Yes
