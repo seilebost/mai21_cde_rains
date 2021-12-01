@@ -1,4 +1,12 @@
-from fastapi import FastAPI, HTTPException, Header, Request, Depends
+from fastapi import (
+    FastAPI,
+    HTTPException,
+    Header,
+    Request,
+    Depends,
+    File,
+    UploadFile,
+)
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from typing import Optional, List
@@ -13,7 +21,7 @@ import base64
 import binascii
 import uvicorn
 
-from project1_train import get_processed_data
+from project1_train import get_processed_data, clean_rows, get_preprocessor
 
 api = FastAPI(
     title="API Models",
@@ -151,6 +159,28 @@ def score(
 
     return {
         "score": models_dict[modelsname.model_name.value].score(X_test, y_test)
+    }
+
+
+@api.post("/predict/{model_name}", name="Get prediction from given data")
+def predict(
+    model_name: Models,
+    file: UploadFile = File(...),
+    authorization_header=Depends(check_authorization),
+) -> dict:
+
+    dataframe = pd.read_csv(file.file)
+
+    dataframe = clean_rows(dataframe)
+
+    X_predict = dataframe.drop(["RainTomorrow"], axis=1)
+
+    preprocessor = get_preprocessor()
+
+    X_predict = preprocessor.transform(X_predict)
+
+    return {
+        "prediction": models_dict[model_name.value].predict(X_predict).tolist()
     }
 
 

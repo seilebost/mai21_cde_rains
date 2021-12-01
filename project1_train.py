@@ -55,7 +55,7 @@ def clean_rows(rains_data: pd.core.frame.DataFrame) -> pd.core.frame.DataFrame:
     return rains_data
 
 
-def get_preprocessor(X_train, y_train, create=False):
+def get_preprocessor(X_train=None, y_train=None, create=False):
     """
     Return a preprocessing pipeline
     """
@@ -68,6 +68,11 @@ def get_preprocessor(X_train, y_train, create=False):
 
     # Create a preprocessing pipeline and save it
     else:
+
+        # If data have not been provided retrieve
+        # with get_data function
+        if X_train is None or y_train is None:
+            X_train, X_test, y_train, y_test = get_data()
 
         num = make_column_selector(dtype_include=np.number)
         cat = make_column_selector(dtype_exclude=np.number)
