@@ -45,7 +45,9 @@ def test_authorization_score():
 
 
 def test_authorization_predict():
-    upload_file = {"file": ("test.csv", open("test.csv", "rb"), "text/csv")}
+    upload_file = {
+        "file": ("test.csv", open("tests/test.csv", "rb"), "text/csv")
+    }
 
     res = requests.post(
         "http://127.0.0.1:8000/predict/SVC",

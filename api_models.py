@@ -21,7 +21,7 @@ import base64
 import binascii
 import uvicorn
 
-from project1_train import get_processed_data, clean_rows, get_preprocessor
+from train.train import get_processed_data, clean_rows, get_preprocessor
 
 api = FastAPI(
     title="API Models",
@@ -76,7 +76,7 @@ def get_models_dict() -> dict:
     """
     Return the dict of available models
     """
-    model_files = glob.glob("*_trained")
+    model_files = glob.glob("ml_models/*_trained")
     models = {}
 
     for file_model in model_files:
@@ -192,4 +192,4 @@ def predict(
 
 
 if __name__ == "__main__":
-    uvicorn.run("api_models:api", host="127.0.0.1", port=8000, reload=True)
+    uvicorn.run("api_models:api", host="0.0.0.0", port=8000, reload=True)

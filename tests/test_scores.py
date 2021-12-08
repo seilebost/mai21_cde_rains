@@ -1,6 +1,6 @@
 import requests
 from api_models import get_models_dict
-from project1_train import get_processed_data
+from train.train import get_processed_data
 import pytest
 
 dict_models = get_models_dict()
