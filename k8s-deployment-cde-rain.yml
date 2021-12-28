@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deploie-projet-cde-rain 
+  labels:
+    app: PROJET-K8S-CDE-RAIN
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      my_label: container-fastapi
+  template:
+    metadata: 
+      labels: 
+        my_label: container-fastapi
+    spec:
+      containers:
+      - name: fastapi
+        image: datascientest/fast_api_cde_rain:1.0.0
