@@ -25,7 +25,7 @@ from train.train import get_processed_data, clean_rows, get_preprocessor
 
 api = FastAPI(
     title="API Models",
-    description="""This API allow to get predictions from trained
+    description="""This API allow to get scores and predictions from trained
      Machine Learning models
     """,
     version="1.0.0",
@@ -45,13 +45,13 @@ X_train, X_test, y_train, y_test = get_processed_data()
 auth_header = Header(
     default="Basic ",
     description="""authorization header need to contain
-    credentials of user (username:password)""",
+    credentials of user (username:password) in base64""",
 )
 
 
 class Models(Enum):
     """
-    Possible values for models
+    Available models
     """
 
     lgbm = "LGBMClassifier"
@@ -74,7 +74,7 @@ class ModelsName(BaseModel):
 
 def get_models_dict() -> dict:
     """
-    Return the dict of available models
+    Return the dict of available models from ml_models folder
     """
     model_files = glob.glob("ml_models/*_trained")
     models = {}
@@ -156,6 +156,9 @@ def get_info(authorization_header=Depends(check_authorization)) -> dict:
 def score(
     modelsname: ModelsName, authorization_header=Depends(check_authorization)
 ) -> dict:
+    """
+    Endpoint that will return the score of the given model using test data
+    """
 
     return {
         "score": models_dict[modelsname.model_name.value].score(X_test, y_test)
@@ -168,7 +171,9 @@ def predict(
     file: UploadFile = File(...),
     authorization_header=Depends(check_authorization),
 ) -> dict:
-
+    """
+    Endpoint that will return the prediction using data from a CSV file
+    """
     if file.content_type != "text/csv":
         raise HTTPException(
             status_code=400,
