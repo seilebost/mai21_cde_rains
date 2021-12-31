@@ -26,6 +26,23 @@ services:
       LOG: 1
     depends_on:
       - fast_api_cde_rain
+  test_predict:
+    restart: on-failure:10
+    image: image_test_predict
+    container_name: container_test_predict
+    ports:
+      - target: 6000
+        published: 6000
+        protocol: tcp
+        mode: host
+    networks:
+      - api_rain_network
+    volumes: 
+      - api_rain_log:/home/api_rain_log
+    environment:
+      LOG: 1
+    depends_on:
+      - fast_api_cde_rain
   test_score:
     restart: on-failure:10
     image: image_test_score
@@ -45,7 +62,6 @@ services:
       - fast_api_cde_rain
 volumes:
   api_rain_log:
-  
 networks:
   api_rain_network:
     driver: bridge
