@@ -3,6 +3,32 @@
 Il s'agit de la mise en place d'une API de Machine Learning sous KUBERNETES.
 ATTENTION : le paramétrage du port IP d'accès à l'API est `8002`
 
+## API avec FastAPI
+
+L'API est dévelopée avec le framework [Fastapi](https://fastapi.tiangolo.com/)
+Il est possible de tester l'API via la commande `python3 api_models.py`
+
+L'API est alors accessible via http://localhost:8000
+
+### Modèles
+
+L'entrainement des modèles a été réalisé via le script `train.py`.
+Ce script va récupérer le fichier *rain.csv* qui contient les données météo brute
+
+### Enpoints
+
+#### /
+Cet endpoint permet de contrôler si l'API est en fonctionnement
+#### /docs
+Fastapi fournit cet endpoint qui permet d'accèder à une documentation de l'API et de tester les différents endpoints
+#### /info
+Renvoie la liste des modèles entraînés disponibles
+#### /score
+Cet endpoint nécessite de sélectionner un modèle et va renvoyer le score obtenu par ce modèle sur les données de test
+#### /predict
+La sélection d'un modèle est aussi nécessaire ainsi que l'envoie d'un fichier CSV contenant les données pour lesquels on veut obtenir une prédiction.
+L'API va charger le modèle entrainé et l'utiliser pour réaliser la prédiction.
+
 ## Partie DOCKER
 
 ### Compilation de l'image fast_api_cde_rain 
