@@ -1,0 +1,57 @@
+version: "3.9"
+services:
+
+  fast_api_cde_rain:
+    image: datascientest/fast_api_cde_rain:1.0.0
+    container_name: fast_api_cde_rain
+    ports:
+      - target: 8000
+        published: 8000
+    networks:
+      - api_rain_network
+  test_info:
+    restart: on-failure:10
+    image: image_test_info
+    container_name: container_test_info
+    ports:
+      - target: 5000
+        published: 5000
+        protocol: tcp
+        mode: host
+    networks:
+      - api_rain_network
+    volumes: 
+      - api_rain_log:/home/api_rain_log
+    environment:
+      LOG: 1
+    depends_on:
+      - fast_api_cde_rain
+  test_score:
+    restart: on-failure:10
+    image: image_test_score
+    container_name: container_test_score
+    ports:
+      - target: 7000
+        published: 7000
+        protocol: tcp
+        mode: host
+    networks:
+      - api_rain_network
+    volumes: 
+      - api_rain_log:/home/api_rain_log
+    environment:
+      LOG: 1
+    depends_on:
+      - fast_api_cde_rain
+volumes:
+  api_rain_log:
+  
+networks:
+  api_rain_network:
+    driver: bridge
+    ipam:
+       driver: default
+       config:
+       - subnet:  172.50.0.0/16
+         gateway: 172.50.0.1
+ 

@@ -1,0 +1,6 @@
+FROM debian:latest
+RUN apt-get update && apt-get install python3-pip -y && pip3 install flask==1.1.1 && pip3 install requests
+ADD test_auth.py /test_auth/test_auth.py
+WORKDIR /test_auth/
+EXPOSE 5000
+CMD python3 test_auth.py
