@@ -1,20 +1,20 @@
-echo "Arrêt du container fastapi_data"
-docker container stop fastapi_data
-echo "Suppression du container fastapi_data"
-docker container rm fastapi_data
+echo "Arrêt du container fast_api_cde_rain"
+docker container stop fast_api_cde_rain
+echo "Suppression du container fast_api_cde_rain"
+docker container rm fast_api_cde_rain
 
-echo "Arrêt du container container_test_auth"
-docker container rm container_test_auth
+echo "Arrêt du container container_test_info"
+docker container rm container_test_info
 
-echo "Arrêt du container container_test_perm"
-docker container rm container_test_perm
+echo "Arrêt du container container_test_predict"
+docker container rm container_test_predict
 
-echo "Arrêt du container container_test_cont"
-docker container rm container_test_cont
+echo "Arrêt du container container_test_score"
+docker container rm container_test_score
 
 echo "Suppression des images"
 
-docker image rm image_test_auth 
-docker image rm image_test_perm
-docker image rm image_test_cont
-docker image rm datascientest/fastapi:1.0.0
+docker image rm datascientest/fast_api_cde_rain:1.0.0 
+docker image rm image_test_info
+docker image rm image_test_predict
+docker image rm image_test_score

@@ -98,17 +98,4 @@ Vérification de l'image dans le depôt de KUBERNETES
 
 Puis vérifier dans le dashboard de KUBERNETES que le déploiement est devenu OK.
 
-## Partie Tests avec docker-compose.yml
 
-### Lancement des tests
-* Se placer dans le répertoire mai21_cde_rains/tests et lancer le script "setup.sh"
-`./setup.sh`
-Le script va créer l'image de l'API fast_api_cde_rain + les images des 3 tests et lancera la commande docker-compose up
-
-* Vérifier la génération de la log des tests dans le terminal
-
-* Vérifier l'alimentation du fichier log.txt dans le répertoire du volume api_rain_log '/var/lib/docker/volumes/tests_api_rain_log/_data'
-ATTENTION : pour que le test test_access_predict soit opérationnel, il faut déposer le fichier "test.csv" qui est dans le répertoire "tests" dans le répertoire du volume "api_rain_log" '/var/lib/docker/volumes/tests_api_rain_log/_data'
-
-* Si besoin lancer le script "off.sh"
-Le script va stopper le container de l'API en cours + supprimer les containers et les images péalablement créées.
