@@ -5,7 +5,7 @@ ATTENTION : le paramétrage du port IP d'accès à l'API est `8002`
 
 ## API avec FastAPI
 
-L'API est dévelopée avec le framework [Fastapi](https://fastapi.tiangolo.com/)
+L'API est dévelopée avec le framework [FastAPI](https://fastapi.tiangolo.com/)
 Il est possible de tester l'API via la commande `python3 api_models.py`
 
 L'API est alors accessible via http://localhost:8000
@@ -13,9 +13,16 @@ L'API est alors accessible via http://localhost:8000
 ### Modèles
 
 L'entrainement des modèles a été réalisé via le script `train.py`.
-Ce script va récupérer le fichier *rain.csv* qui contient les données météo brute
+Ce script va récupérer le fichier **rain.csv** qui contient les données météo brute, les nettoyer puis entraîner les différentes modèles avec ces données.
+Chaque modèles est ensuite sauvegardé dans un fichier pour être utilisé par l'API.
 
 ### Enpoints
+
+#### Authentification
+Hormis les endpoints / et /docs il est nécessaire de  s'authentifier via le header **authorization-header**. Le header doit être de cette forme : *Basic b64string*
+*b64string* est une chaîne de caractère en base64 correspond correspondant couple *user:password*
+
+Par exemple on peut s'authentifier en envoyant un **authorization-header** *Basic YWxpY2U6d29uZGVybGFuZA==* avec *YWxpY2U6d29uZGVybGFuZA==* étant la chaîne de caratères *alice:wonderland* encodée en base64
 
 #### /
 Cet endpoint permet de contrôler si l'API est en fonctionnement
