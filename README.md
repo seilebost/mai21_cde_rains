@@ -1,6 +1,6 @@
 # API Machine Learning
 
-Il s'agit de la mise en place d'une API de Machine Learning sous KUBERNETES.
+Il s'agit de la mise en place d'une API de Machine Learning sous KUBERNETES.  
 ATTENTION : le paramétrage du port IP d'accès à l'API est `8002`
 
 ## API avec FastAPI
@@ -42,8 +42,8 @@ L'API va charger le modèle entrainé et l'utiliser pour réaliser la prédictio
 docker image build . -t datascientest/fast_api_cde_rain:1.0.0
 
 ### Test de l'api seul via docker
-docker container run -p 8000:8000 datascientest/fast_api_cde_rain:1.0.0
-la commande `curl -X GET http://0.0.0.0:8000` doit retourner `{"status":"running"}` 
+Lancement du container de l'API via docker : `docker container run -p 8000:8000 datascientest/fast_api_cde_rain:1.0.0`  
+La commande `curl -X GET http://0.0.0.0:8000` doit retourner `{"status":"running"}` 
 
 ## Partie KUBERNETES
 
@@ -58,7 +58,8 @@ la commande `curl -X GET http://0.0.0.0:8000` doit retourner `{"status":"running
 
 ### Accès en local du dashboard
 `kubectl proxy --address='0.0.0.0' --disable-filter=true`
-retourne par exemple `http://127.0.0.1:36351/api/v1/namespaces/kubernetes-dashboard/services/http:kubernetes-dashboard:/proxy/` : remplacer 127.0.0.1 par l'adresse IP publique du poste et remplacer le port 36351 par 8001
+retourne par exemple `http://127.0.0.1:36351/api/v1/namespaces/kubernetes-dashboard/services/http:kubernetes-dashboard:/proxy/` :  
+remplacer 127.0.0.1 par l'adresse IP publique du poste et remplacer le port 36351 par 8001
 
 ### Déploiement de notre API via la ligne de commande
 
@@ -81,7 +82,7 @@ Si le déploiement est KO, vérifier que l'image docker est bien déployée dans
 ssh -i "data_enginering_machine.pem" ubuntu@adresseIPpersonnelle -fNL 8002:192.168.49.2:80
 puis sur un navigateur :
 `http://localhost/docs` pour avoir la documentation de l'API
-`http://localhost/` pour avoir le statut de l'API (running si disponible dans KUBERNETES)
+`http://localhost/` pour avoir le statut de l'API (running si disponible dans KUBERNETES).
 
 ## F.A.Q.
 
@@ -95,6 +96,6 @@ puis
 Vérification de l'image dans le depôt de KUBERNETES 
 `minikube ssh` puis `docker images`
 
-Puis vérifier dans le dashboard de KUBERNETES que le déploiement est devenu OK
+Puis vérifier dans le dashboard de KUBERNETES que le déploiement est devenu OK.
 
 

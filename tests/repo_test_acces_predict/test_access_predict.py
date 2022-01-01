@@ -13,7 +13,7 @@ api_port = 8000
 ###################################################################################################
 
 upload_file1 = {
-            "file": ("test.csv", open("/test.csv", "rb"), "text/csv")
+            "file": ("test.csv", open("/home/api_rain_log/test.csv", "rb"), "text/csv")
         }
 r1 = requests.post(
         f"http://{api_address}:{api_port}/predict/SVC",
@@ -61,7 +61,7 @@ if str(os.environ.get('LOG')) == "1":
 ###################################################################################################
 
 upload_file2 = {
-            "file": ("test.csv", open("/test.csv", "rb"), "text/markdown")
+            "file": ("test.csv", open("/home/api_rain_log/test.csv", "rb"), "text/markdown")
         }
         
 r2 = requests.post(
