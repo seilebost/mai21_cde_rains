@@ -19,10 +19,10 @@ Chaque modèles est ensuite sauvegardé dans un fichier pour être utilisé par 
 ### Enpoints
 
 #### Authentification
-Hormis les endpoints / et /docs il est nécessaire de  s'authentifier via le header **authorization-header**. Le header doit être de cette forme : *Basic b64string*
-*b64string* est une chaîne de caractère en base64 correspond correspondant couple *user:password*
+Hormis pour les endpoints / et /docs il est nécessaire de  s'authentifier via le header **authorization-header**. Le header doit être de cette forme : *Basic b64string*
+*b64string* est une chaîne de caractère en base64 correspond correspondant à un couple *user:password*
 
-Par exemple on peut s'authentifier en envoyant un **authorization-header** *Basic YWxpY2U6d29uZGVybGFuZA==* avec *YWxpY2U6d29uZGVybGFuZA==* étant la chaîne de caratères *alice:wonderland* encodée en base64
+Par exemple on peut s'authentifier en envoyant comme **authorization-header**: *Basic YWxpY2U6d29uZGVybGFuZA==* avec *YWxpY2U6d29uZGVybGFuZA==* étant la chaîne de caratères *alice:wonderland* encodée en base64
 
 #### /
 Cet endpoint permet de contrôler si l'API est en fonctionnement
@@ -32,8 +32,8 @@ Fastapi fournit cet endpoint qui permet d'accèder à une documentation de l'API
 Renvoie la liste des modèles entraînés disponibles
 #### /score
 Cet endpoint nécessite de sélectionner un modèle et va renvoyer le score obtenu par ce modèle sur les données de test
-#### /predict
-La sélection d'un modèle est aussi nécessaire ainsi que l'envoie d'un fichier CSV contenant les données pour lesquels on veut obtenir une prédiction.
+#### /predict/{model}
+Un endpoint est disponible pour chaque modèle présent dans l'API et il est nécessaire d'envoyer un fichier CSV contenant les données pour lesquels on veut obtenir une prédiction.
 L'API va charger le modèle entrainé et l'utiliser pour réaliser la prédiction.
 
 ## Partie DOCKER
